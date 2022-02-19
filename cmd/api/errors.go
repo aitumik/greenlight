@@ -17,7 +17,6 @@ func (app *application) errorResponse(w http.ResponseWriter, r *http.Request, st
 
 	err := app.writeJSON(w, status, env, nil)
 	if err != nil {
-		//cannot use r (type *http.Request) as type http.Request in argument to app.logError
 		app.logError(r, err)
 		w.WriteHeader(500)
 	}
@@ -42,4 +41,8 @@ func (app *application) notFoundResponse(w http.ResponseWriter, r *http.Request)
 func (app *application) methodNotAllowedResponse(w http.ResponseWriter, r *http.Request) {
 	message := fmt.Sprintf("the %s is not supported by the resource", r.Method)
 	app.errorResponse(w, r, http.StatusMethodNotAllowed, message)
+}
+
+func (app *application) badRequestResponse(w http.ResponseWriter, r *http.Request, err error) {
+	app.errorResponse(w, r, http.StatusBadRequest, err.Error())
 }
