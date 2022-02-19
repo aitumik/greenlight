@@ -4,16 +4,17 @@ import (
 	"net/http"
 )
 
-func (app *application) healthcheckHandler(w http.ResponseWriter,r *http.Request) {
+func (app *application) healthcheckHandler(w http.ResponseWriter, r *http.Request) {
 	data := map[string]string{
-		"status" : "available",
+		"status":      "available",
 		"environment": app.config.env,
-		"version": version,
+		"version":     version,
 	}
 
-	err := app.writeJSON(w,http.StatusOK,data,nil)
+	err := app.writeJSON(w, http.StatusOK, envelope{"status": data}, nil)
 	if err != nil {
 		app.logger.Println(err)
-		http.Error(w,"The server encountered an error and could not process your request",http.StatusInternalServerError)
+		http.Error(w, "The server encountered an error and could not process your request", http.StatusInternalServerError)
 	}
 }
+
