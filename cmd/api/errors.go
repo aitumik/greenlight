@@ -17,13 +17,14 @@ func (app *application) errorResponse(w http.ResponseWriter, r *http.Request, st
 
 	err := app.writeJSON(w, status, env, nil)
 	if err != nil {
+		//cannot use r (type *http.Request) as type http.Request in argument to app.logError
 		app.logError(r, err)
 		w.WriteHeader(500)
 	}
 }
 
 func (app *application) serverErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
-	app.logError(w, err)
+	app.logError(r, err)
 
 	message := "the server encountered an error and couldn't process your request"
 	app.errorResponse(w, r, http.StatusInternalServerError, message)
