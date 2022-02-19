@@ -27,14 +27,17 @@ func (app *application) writeJSON(w http.ResponseWriter, status int, data envelo
 		return err
 	}
 
-	js = append(js, '\n')
+	info = append(info, '\n')
 
+	// write all the headers in headers to request header
 	for key, value := range headers {
 		w.Header()[key] = value
 	}
 
+	// Write Content-Type
 	w.Header().Set("Content-Type", "application/json")
+
 	w.WriteHeader(status)
-	w.Write(js)
+	w.Write(info)
 	return nil
 }
