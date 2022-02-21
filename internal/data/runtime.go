@@ -1,3 +1,26 @@
 package data
 
+import (
+	"errors"
+	"strconv"
+	"strings"
+)
+
+var ErrInvalidRuntimeFormat = errors.New("invalid runtime format")
+
 type Runtime int32
+
+func (r Runtime) UnmarshalJSON(jsonValue []byte) error {
+	unquotedJSONValue, err := strconv.Unquote(string(jsonValue))
+	if err != nil {
+		return ErrInvalidRuntimeFormat
+	}
+
+	parts := strings.Split(unquotedJSONValue, " ")
+	if len(parts) != 2 || parts[1] != "mins" {
+		return ErrInvalidRuntimeFormat
+	}
+
+	*r = Runtime(i)
+	return nil
+}

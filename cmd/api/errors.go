@@ -19,6 +19,7 @@ func (app *application) errorResponse(w http.ResponseWriter, r *http.Request, st
 	if err != nil {
 		app.logError(r, err)
 		w.WriteHeader(500)
+		return
 	}
 }
 
