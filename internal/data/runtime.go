@@ -21,6 +21,10 @@ func (r Runtime) UnmarshalJSON(jsonValue []byte) error {
 		return ErrInvalidRuntimeFormat
 	}
 
+	i, err := strconv.ParseInt(parts[0], 10, 32)
+	if err != nil {
+		return ErrInvalidRuntimeFormat
+	}
 	*r = Runtime(i)
 	return nil
 }

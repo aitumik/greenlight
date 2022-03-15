@@ -24,7 +24,7 @@ func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// Dump the contents of the input struct in a HTTP response
+	// Dump the contents of the input struct in an HTTP response
 	fmt.Fprintf(w, "%+v\n", input)
 }
 
