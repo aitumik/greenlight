@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"greenlight/internal/data"
+	"greenlight/internal/validator"
 	"net/http"
 	"time"
 )
@@ -13,7 +14,7 @@ func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Reques
 	var input struct {
 		Title   string   `json:"title"`
 		Year    int32    `json:"year"`
-		Runtime int32    `json:"runtime"`
+		Runtime data.Runtime    `json:"runtime"`
 		Genres  []string `json:"genres"`
 	}
 
@@ -21,6 +22,30 @@ func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Reques
 	err := app.readJSON(w, r, &input)
 	if err != nil {
 		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	// initialize a new validator instance
+	v := validator.New()
+
+	v.Check(input.Title != "", "title", "title must be provided")
+	v.Check(len(input.Title) <= 500, "title", "title must not exceed 500 bytes")
+
+	v.Check(input.Year != 0, "year", "must be provided")
+	v.Check(input.Year >= 1888, "year", "year must be greater than 1888")
+	v.Check(input.Year <= int32(time.Now().Year()), "year", "must not be in the future")
+
+	v.Check(input.Runtime != 0, "runtime", "must be provided")
+	v.Check(input.Runtime > 0, "runtime", "must be a positive integer")
+
+	v.Check(input.Genres != nil, "genres", "must be provided")
+	v.Check(len(input.Genres) >= 1, "genres", "must contain atleast 1 genre")
+	v.Check(len(input.Genres) <= 5, "genres", "must not contain more than 5 genres")
+
+	v.Check(validator.Unique(input.Genres), "genres", "must not contain duplicate values")
+
+	if !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
 

@@ -4,12 +4,12 @@ import "regexp"
 
 var EmailRX = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+\\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\. [a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
-// Defines new validator with a map of validation errors
+// Validator new validator with a map of validation errors
 type Validator struct {
 	Errors map[string]string
 }
 
-// New is the helper that creates the validator insance
+// New is the helper that creates the validator instance
 // with an empty errors map
 func New() *Validator {
 	return &Validator{Errors: make(map[string]string)}
@@ -23,11 +23,11 @@ func (v *Validator) Valid() bool {
 // AddError adds an error to the errors map
 func (v *Validator) AddError(key, msg string) {
 	if _, exists := v.Errors[key]; !exists {
-		v.Errors[key] = message
+		v.Errors[key] = msg
 	}
 }
 
-// Adds an error msg only if ok is true
+// Check an error msg only if ok is true
 func (v *Validator) Check(ok bool, key, msg string) {
 	if !ok {
 		v.AddError(key, msg)
@@ -48,7 +48,7 @@ func Matches(needle string, rx *regexp.Regexp) bool {
 }
 
 func Unique(values []string) bool {
-	uniqueValues = make(map[string]bool)
+	uniqueValues := make(map[string]bool)
 	for _, value := range values {
 		uniqueValues[value] = true
 	}

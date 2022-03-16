@@ -29,7 +29,7 @@ func main() {
 	flag.StringVar(&cfg.env,"env","development","(dev|prod|staging|test)")
 	flag.Parse()
 
-	logger := log.New(os.Stdout,"[INSIGHT]\t",log.Ldate | log.Ltime)
+	logger := log.New(os.Stdout,"[INFO]\t",log.Ldate | log.Ltime)
 
 	app := &application{
 		config: cfg,

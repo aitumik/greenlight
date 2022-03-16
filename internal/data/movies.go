@@ -28,7 +28,7 @@ func (m Movie) MarshalJSON() ([]byte, error) {
 	// Anonymous struct
 	aux := struct {
 		MovieAlias
-		Runtime string `json:"runtime, omitempty,string"`
+		Runtime string `json:"runtime,omitempty,string"`
 	}{
 		MovieAlias: MovieAlias(m),
 		Runtime:    runtime,
