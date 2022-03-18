@@ -8,10 +8,11 @@ import (
 var (
 	ErrRecordNotFound = errors.New("err : record not found")
 )
+
 type Models struct {
-	Movies interface{
+	Movies interface {
 		Insert(movie *Movie) error
-		Get(id int64) (*Movie,error)
+		Get(id int64) (*Movie, error)
 		Update(movie *Movie) error
 		Delete(id int64) error
 	}
