@@ -1,6 +1,7 @@
 package data
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
@@ -70,7 +71,11 @@ func (m MovieModel) Insert(movie *Movie) error {
 	// args to be inserted to the db
 	args := []interface{}{movie.Title,movie.Year,movie.Runtime,pq.Array(movie.Genres)}
 
-	return m.DB.QueryRow(query,args...).Scan(&movie.ID,&movie.CreatedAt,&movie.Version)
+	// Prevent long running queries
+	ctx,cancel := context.WithTimeout(context.Background(),3 * time.Second)
+	defer cancel()
+
+	return m.DB.QueryRowContext(ctx,query,args...).Scan(&movie.ID,&movie.CreatedAt,&movie.Version)
 }
 
 func (m MovieModel) Get(id int64) (*Movie,error) {
@@ -82,8 +87,12 @@ func (m MovieModel) Get(id int64) (*Movie,error) {
 
 	// Create a variable
 	var movie Movie
-	
-	err := m.DB.QueryRow(stmt,id).Scan(
+
+	ctx,cancel := context.WithTimeout(context.Background(),3 * time.Second)
+
+	defer cancel()
+
+	err := m.DB.QueryRowContext(ctx,stmt,id).Scan(
 		&movie.ID,
 		&movie.CreatedAt,
 		&movie.Title,
