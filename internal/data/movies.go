@@ -78,6 +78,57 @@ func (m MovieModel) Insert(movie *Movie) error {
 	return m.DB.QueryRowContext(ctx,query,args...).Scan(&movie.ID,&movie.CreatedAt,&movie.Version)
 }
 
+func (m MovieModel) GetAll(title string,genres []string,filters Filters) ([]*Movie,error) {
+	query := fmt.Sprintf(`
+	SELECT id,created_at,title,year,runtime,genres,version
+	FROM movies
+	WHERE (to_tsvector('simple',title) @@ plainto_tsquery('simple',$1) OR $1 = '')
+	AND (genres @> $2 OR $2 = '{}')
+	ORDER BY %s %s,id ASC`,filters.sortColumn(),filters.sortDirection())
+
+	ctx,cancel := context.WithTimeout(context.Background(),3 * time.Second)
+	defer cancel()
+
+	rows,err := m.DB.QueryContext(ctx,query,title,pq.Array(genres))
+	if err != nil {
+		return nil,err
+	}
+
+	// Rows have something at least
+
+	defer rows.Close()
+
+	// Initialize an empty slice to store movie data
+	movies := []*Movie{}
+
+	for rows.Next() {
+
+		// Initialize an empty movie struct to hold individual movie
+		var movie Movie
+
+		err := rows.Scan(
+			&movie.ID,
+			&movie.CreatedAt,
+			&movie.Title,
+			&movie.Year,
+			&movie.Runtime,
+			pq.Array(&movie.Genres),
+			&movie.Version,
+		)
+
+		if err != nil {
+			return nil,err
+		}
+
+		movies = append(movies,&movie)
+	}
+	if err = rows.Err(); err != nil {
+		return nil,err
+	}
+
+	return movies,nil
+}
+
 func (m MovieModel) Get(id int64) (*Movie,error) {
 	if id < 1 {
 		return nil,ErrRecordNotFound
@@ -170,6 +221,10 @@ type MockMovieModel struct {}
 
 func (m MockMovieModel) Insert(movie *Movie) error {
 	return nil
+}
+
+func (m MockMovieModel) GetAll(title string,genres []string,f Filters) ([]*Movie,error) {
+	return nil,nil
 }
 
 func (m MockMovieModel) Get(id int64) (*Movie,error) {

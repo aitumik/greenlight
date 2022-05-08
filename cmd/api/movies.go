@@ -82,6 +82,46 @@ func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request)
 	}
 }
 
+func (app *application) listMoviesHandler(w http.ResponseWriter,r *http.Request) {
+	var input struct {
+		Title string
+		Genres []string
+		data.Filters
+	}
+
+	// Create new validator
+	v := validator.New()
+
+	q := r.URL.Query()
+
+	// TODO : Check recursion here
+	input.Title = app.readString(q,"title","")
+	input.Genres = app.readCSV(q,"genres",[]string{})
+
+	input.Filters.Page = app.readInt(q,"page",1,v)
+	input.Filters.PageSize = app.readInt(q,"page_size",20,v)
+
+	input.Filters.Sort = app.readString(q,"sort","id")
+
+	input.SortSafelist = []string{"id","title","year","runtime","-id","-title","-year","-runtime"}
+
+	if data.ValidateFilters(v,input.Filters); !v.Valid() {
+		app.failedValidationResponse(w,r,v.Errors)
+		return
+	}
+
+	movies,err := app.models.Movies.GetAll(input.Title,input.Genres,input.Filters)
+	if err != nil {
+		app.serverErrorResponse(w,r,err)
+		return
+	}
+
+	err = app.writeJSON(w,http.StatusOK,envelope{"movies" : movies},nil)
+	if err != nil {
+		app.serverErrorResponse(w,r,err)
+	}
+}
+
 func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := app.readIDParam(r)
 	if err != nil {
