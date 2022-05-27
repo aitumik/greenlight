@@ -1,0 +1,36 @@
+version : "3"
+
+services:
+# api
+  api:
+    container_name: greenlight_api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/greenlight
+    depends_on:
+      - db
+
+# database
+  db:
+    env_file: .env
+    image: "postgres"
+    hostname: "db"
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+# volumes
+volumes:
+  pgdata:
+    driver: local
+        
+
+
+    
+
