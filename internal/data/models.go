@@ -7,13 +7,13 @@ import (
 
 var (
 	ErrRecordNotFound = errors.New("err : record not found")
-	ErrEditConflict = errors.New("err : edit conflict")
+	ErrEditConflict   = errors.New("err : edit conflict")
 )
 
 type Models struct {
 	Movies interface {
 		Insert(movie *Movie) error
-		GetAll(title string,genres []string,f Filters) ([]*Movie,error)
+		GetAll(title string, genres []string, f Filters) ([]*Movie, Metadata, error)
 		Get(id int64) (*Movie, error)
 		Update(movie *Movie) error
 		Delete(id int64) error
