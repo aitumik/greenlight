@@ -40,7 +40,7 @@ func main() {
 	var cfg config
 
 	// Get the variables from the command line
-	flag.IntVar(&cfg.port, "port", 4000, "API server port")
+	flag.IntVar(&cfg.port, "port", 8000, "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "(dev|prod|staging|test)")
 
 	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("GREENLIGHT_DB_DSN"), "PostgreSQL DSN")
