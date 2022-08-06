@@ -6,6 +6,7 @@ import (
 	"flag"
 	"greenlight/internal/data"
 	"greenlight/internal/jsonlog"
+	"greenlight/internal/mailer"
 	"log"
 	"os"
 	"time"
@@ -33,12 +34,21 @@ type config struct {
 		burst   int
 		enabled bool
 	}
+
+	mailer struct {
+		host     string
+		port     int
+		username string
+		password string
+		sender   string
+	}
 }
 
 type application struct {
 	config config
 	logger *jsonlog.Logger
 	models data.Models
+	mailer mailer.Mailer
 }
 
 func main() {
@@ -58,6 +68,13 @@ func main() {
 	flag.Float64Var(&cfg.limiter.rps, "rate-limiter", 2, "The number of requests per second")
 	flag.IntVar(&cfg.limiter.burst, "burst", 4, "The amount of tokens initially in the bucket")
 	flag.BoolVar(&cfg.limiter.enabled, "enabled", true, "Enable rate limiter")
+
+	// SMTP mail configuration
+	flag.StringVar(&cfg.mailer.host, "smtp-host", "smtp.mailtrap.io", "SMTP mail server host")
+	flag.IntVar(&cfg.mailer.port, "smtp-port", 25, "SMTP mail server port")
+	flag.StringVar(&cfg.mailer.username, "smtp-username", "bbda2b7b3ddaed", "SMTP mail server username")
+	flag.StringVar(&cfg.mailer.password, "smtp-password", "61c0aa60ad4c58", "SMTP mail server password")
+	flag.StringVar(&cfg.mailer.sender, "smtp-sender", "Greenlight <no-reply@greenlight.aitumik.io>", "SMTP mail sender")
 
 	flag.Parse()
 
@@ -93,6 +110,7 @@ func main() {
 		config: cfg,
 		logger: logger,
 		models: data.NewModels(db),
+		mailer: mailer.New(cfg.mailer.host, cfg.mailer.port, cfg.mailer.username, cfg.mailer.password, cfg.mailer.sender),
 	}
 
 	err = app.serve()
