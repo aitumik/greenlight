@@ -48,7 +48,7 @@ func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst int
 
 	// Use the http.MaxBytesReader to limit the size of request body to 1MB
 	maxBytes := 1_048_576
-	r.Body = http.MaxBytesReader(w,r.Body,int64(maxBytes))
+	r.Body = http.MaxBytesReader(w, r.Body, int64(maxBytes))
 
 	dec := json.NewDecoder(r.Body)
 	dec.DisallowUnknownFields()
@@ -81,7 +81,7 @@ func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst int
 	return nil
 }
 
-func (app *application) readString(qs url.Values,key string,defaultValue string) string {
+func (app *application) readString(qs url.Values, key string, defaultValue string) string {
 	s := qs.Get(key)
 
 	if s == "" {
@@ -91,29 +91,44 @@ func (app *application) readString(qs url.Values,key string,defaultValue string)
 	return s
 }
 
-func (app *application) readCSV(qs url.Values,key string,defaultValue []string) []string {
+func (app *application) readCSV(qs url.Values, key string, defaultValue []string) []string {
 	csv := qs.Get(key)
 
 	if csv == "" {
 		return defaultValue
 	}
 
-	return strings.Split(csv,",")
+	return strings.Split(csv, ",")
 }
 
-func (app *application) readInt(qs url.Values,key string,defaultValue int,v *validator.Validator) int {
+func (app *application) readInt(qs url.Values, key string, defaultValue int, v *validator.Validator) int {
 	s := qs.Get(key)
 
 	if s == "" {
 		return defaultValue
 	}
 
-	i,err := strconv.Atoi(s)
+	i, err := strconv.Atoi(s)
 
 	if err != nil {
-		v.AddError(key,"must be an integer value")
+		v.AddError(key, "must be an integer value")
 		return defaultValue
 	}
 
 	return i
+}
+
+func (app *application) background(fn func()) {
+
+	app.wg.Add(1)
+
+	go func() {
+		defer func() {
+			if err := recover(); err != nil {
+				app.logger.PrintError(fmt.Errorf("%s", err), nil)
+			}
+		}()
+
+		fn()
+	}()
 }
