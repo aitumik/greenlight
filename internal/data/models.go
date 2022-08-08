@@ -23,6 +23,7 @@ type Models struct {
 		Insert(user *User) error
 		GetByEmail(email string) (*User, error)
 		Update(user *User) error
+		GetUserForToken(scope, plainToken string) (*User, error)
 	}
 	Tokens interface {
 		New(userID int64, ttl time.Duration, scope string) (*Token, error)
