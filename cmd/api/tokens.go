@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-func (app *application) activationTokenHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) createActivationTokenHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		Email string `json:"email"`
 	}
