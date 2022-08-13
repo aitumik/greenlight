@@ -9,6 +9,7 @@ import (
 	"greenlight/internal/mailer"
 	"log"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -42,6 +43,10 @@ type config struct {
 		username string
 		password string
 		sender   string
+	}
+
+	cors struct {
+		trustedOrigins []string
 	}
 }
 
@@ -77,6 +82,12 @@ func main() {
 	flag.StringVar(&cfg.mailer.username, "smtp-username", "bbda2b7b3ddaed", "SMTP mail server username")
 	flag.StringVar(&cfg.mailer.password, "smtp-password", "61c0aa60ad4c58", "SMTP mail server password")
 	flag.StringVar(&cfg.mailer.sender, "smtp-sender", "Greenlight <no-reply@greenlight.aitumik.io>", "SMTP mail sender")
+
+	// Trusted CORS origins
+	flag.Func("trusted-cors-origins", "Trusted CORS origins (Space seperated)", func(s string) error {
+		cfg.cors.trustedOrigins = strings.Fields(s)
+		return nil
+	})
 
 	flag.Parse()
 
