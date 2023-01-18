@@ -20,6 +20,7 @@ type Movie struct {
 	Runtime   Runtime   `json:"-"`
 	Genres    []string  `json:"genres,omitempty"`
 	Version   int32     `json:"version"`
+	Images    []string  `json:"images,omitempty"`
 }
 
 func (m Movie) MarshalJSON() ([]byte, error) {
@@ -53,6 +54,8 @@ func ValidateMovie(v *validator.Validator, movie *Movie) {
 	v.Check(movie.Genres != nil, "genres", "must be provided")
 	v.Check(len(movie.Genres) >= 1, "genres", "must contain at least 1 genre")
 	v.Check(len(movie.Genres) <= 5, "genres", "must not contain more than 5 genres")
+
+	v.Check(len(movie.Images) >= 1, "images", "must container atleast 1 image")
 
 	v.Check(validator.Unique(movie.Genres), "genres", "must not contain duplicate values")
 }

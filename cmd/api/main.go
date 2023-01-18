@@ -106,7 +106,9 @@ func main() {
 		logger.PrintFatal(err, nil)
 	}
 
-	migrator, err := migrate.NewWithDatabaseInstance("file:///Users/nate/fun/greenlight/migrations", "postgres", migrationDriver)
+	currentDir, err := os.Getwd()
+
+	migrator, err := migrate.NewWithDatabaseInstance("file:///"+currentDir+"/migrations", "postgres", migrationDriver)
 	if err != nil {
 		logger.PrintFatal(err, nil)
 	}

@@ -17,6 +17,7 @@ func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Reques
 		Year    int32        `json:"year"`
 		Runtime data.Runtime `json:"runtime"`
 		Genres  []string     `json:"genres"`
+		Images  []string     `json:"images"`
 	}
 
 	// Decode the request
@@ -31,6 +32,7 @@ func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Reques
 		Year:    input.Year,
 		Runtime: input.Runtime,
 		Genres:  input.Genres,
+		Images:  input.Images,
 	}
 	// initialize a new validator instance
 	v := validator.New()
