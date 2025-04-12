@@ -12,6 +12,11 @@ var (
 )
 
 type Models struct {
+	Events interface {
+		Insert(event *Event) (*Event, error)
+		Get(id int64) (*Event, error)
+		Update(id int64, event *Event) (*Event, error)
+	}
 	Movies interface {
 		Insert(movie *Movie) error
 		GetAll(title string, genres []string, f Filters) ([]*Movie, Metadata, error)

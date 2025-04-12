@@ -1,7 +1,5 @@
 FROM golang:1.18.2-alpine
 
-MAINTAINER aitumik@protonmail.com
-
 WORKDIR /build
 
 COPY go.sum .

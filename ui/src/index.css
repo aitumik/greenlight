@@ -1,0 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+@import "tailwindcss";
+
+body {
+  font-family: 'Inter', sans-serif;
+  box-sizing: border-box;
+  height: 100%;
+}
+
+
+.hero-radial {
+  background: rgb(32,17,70);
+  background: linear-gradient(180deg, rgba(32,17,70,1) 0%, rgba(19,21,23,1) 100%);
+  top: 0;
+  height: 60px;
+  z-index: 49;
+}
