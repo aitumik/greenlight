@@ -10,6 +10,9 @@ COPY bun.lock package.json vite.config.js ./
 # Install dependencies using Bun
 RUN bun install
 
+# Add vite 
+RUN bun add -d vite
+
 # Copy the rest of your project
 COPY . .
 
