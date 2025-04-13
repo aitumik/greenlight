@@ -43,6 +43,7 @@ type Models struct {
 
 func NewModels(db *sql.DB) Models {
 	return Models{
+		Events:      EventModel{DB: db},
 		Movies:      MovieModel{DB: db},
 		Users:       UserModel{DB: db},
 		Tokens:      TokenModel{DB: db},

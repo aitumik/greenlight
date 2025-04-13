@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"greenlight/internal/data"
+	"greenlight/internal/validator"
+	"log"
 	"net/http"
 	"time"
 )
@@ -35,14 +37,26 @@ func (app *application) createEventHandler(w http.ResponseWriter, r *http.Reques
 		Cover:       input.Cover,
 	}
 
-	// since its a pointer I expect the event to contain id
-	app.models.Events.Insert(event)
+	v := validator.New()
+	data.ValidateEvent(v, event)
+
+	if !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	created, err := app.models.Events.Insert(event)
+	if err != nil {
+		log.Fatal(err)
+		app.serverErrorResponse(w, r, err)
+		return
+	}
 
 	headers := make(http.Header)
-	headers.Set("Location", fmt.Sprintf("/v1/events/%d", event.ID))
+	headers.Set("Location", fmt.Sprintf("/v1/events/%d", created.ID))
 
 	data := envelope{
-		"event": event,
+		"event": created,
 	}
 
 	err = app.writeJSON(w, http.StatusCreated, data, headers)

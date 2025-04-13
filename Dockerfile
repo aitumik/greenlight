@@ -11,5 +11,5 @@ RUN go mod download
 
 RUN go build -o greenlight cmd/api/*
 
-CMD ["./greenlight"]
+ENTRYPOINT ["./greenlight"]
 

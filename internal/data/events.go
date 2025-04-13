@@ -27,7 +27,8 @@ func ValidateEvent(v *validator.Validator, event *Event) {
 	v.Check(len(event.Title) <= 500, "title", "title must not exceed 500 bytes")
 
 	// todo : check that the end time is not in the past, start time can be in the past
-	//v.Check(event.Year <= int32(time.Now().Year()), "year", "must not be in the future")
+	v.Check(event.EndTime.After(time.Now()), "start_time", "must not be in the past")
+	v.Check(event.StartTime.Before(event.EndTime), "start_time", "must be before end time")
 
 	v.Check(event.Cover != "", "images", "must container atleast 1 cover image")
 
@@ -40,12 +41,12 @@ type EventModel struct {
 
 func (m EventModel) Insert(event *Event) (*Event, error) {
 	query := `
-		INSERT INTO events(start_time,end_time,title,description,tags,cover)
-		VALUES($1,$2,$3,$4,$5,$6)
+		INSERT INTO events(start_time,end_time,title,description,venue,tags,cover)
+		VALUES($1,$2,$3,$4,$5,$6,$7)
 		RETURNING id,created_at,version
 	`
 
-	args := []interface{}{event.StartTime, event.EndTime, event.Title, event.Description, pq.Array(event.Tags), event.Cover}
+	args := []interface{}{event.StartTime, event.EndTime, event.Title, event.Description, event.Venue, pq.Array(event.Tags), event.Cover}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
