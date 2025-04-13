@@ -19,7 +19,9 @@ func (app *application) routes() http.Handler {
 
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler)
 
+	router.HandlerFunc(http.MethodGet, "/v1/events", app.listEventsHandler)
 	router.HandlerFunc(http.MethodPost, "/v1/events", app.createEventHandler)
+	router.HandlerFunc(http.MethodGet, "/v1/events/:id", app.showEventHandler)
 
 	router.HandlerFunc(http.MethodGet, "/v1/movies", app.requirePermission("movies:read", app.requireActivatedUser(app.listMoviesHandler)))
 	router.HandlerFunc(http.MethodPost, "/v1/movies", app.requirePermission("movies:write", app.requireActivatedUser(app.createMovieHandler)))

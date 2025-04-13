@@ -145,7 +145,7 @@ func (m MovieModel) Get(id int64) (*Movie, error) {
 		return nil, ErrRecordNotFound
 	}
 
-	stmt := `SELECT id,created_at,title,year,runtime,genres,version FROM movies WHERE id = $1`
+	stmt := `SELECT id,created_at,title,year,runtime,genres,images,version FROM movies WHERE id = $1`
 
 	// Create a variable
 	var movie Movie
@@ -161,6 +161,7 @@ func (m MovieModel) Get(id int64) (*Movie, error) {
 		&movie.Year,
 		&movie.Runtime,
 		pq.Array(&movie.Genres),
+		pq.Array(&movie.Images),
 		&movie.Version)
 
 	if err != nil {

@@ -74,8 +74,53 @@ func (app *application) showEventHandler(w http.ResponseWriter, r *http.Request)
 
 	event, err := app.models.Events.Get(id)
 	if err != nil {
-
+		// TODO : we need to know the error type so as to show correct feedback to user
+		app.notFoundResponse(w, r)
+		return
 	}
 
 	app.writeJSON(w, http.StatusOK, envelope{"event": event}, nil)
+}
+
+func (app *application) listEventsHandler(w http.ResponseWriter, r *http.Request) {
+	var input struct {
+		Title       string
+		Description string
+		Venue       string
+		Location    string
+		Tags        []string
+		data.Filters
+	}
+
+	q := r.URL.Query()
+
+	input.Title = app.readString(q, "title", "")
+	input.Description = app.readString(q, "description", "")
+	input.Venue = app.readString(q, "venue", "")
+	input.Location = app.readString(q, "location", "Nairobi")
+	input.Tags = app.readCSV(q, "tags", []string{})
+
+	v := validator.New()
+
+	input.Filters.Page = app.readInt(q, "page", 1, v)
+	input.Filters.PageSize = app.readInt(q, "page_size", 10, v)
+	input.Filters.Sort = app.readString(q, "sort", "id")
+
+	input.Filters.SortSafelist = []string{"title", "description", "-title", "-description"}
+
+	if data.ValidateFilters(v, input.Filters); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	events, metadata, err := app.models.Events.GetAll(input.Location, input.Title, input.Description, input.Tags, input.Filters)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"events": events, "metadata": metadata}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+
 }

@@ -14,6 +14,7 @@ var (
 type Models struct {
 	Events interface {
 		Insert(event *Event) (*Event, error)
+		GetAll(locations string, title string, description string, tags []string, f Filters) ([]*Event, Metadata, error)
 		Get(id int64) (*Event, error)
 		Update(id int64, event *Event) (*Event, error)
 	}

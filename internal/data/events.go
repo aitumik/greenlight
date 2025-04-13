@@ -3,6 +3,7 @@ package data
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"greenlight/internal/validator"
 	"time"
 
@@ -17,6 +18,7 @@ type Event struct {
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
 	Venue       string    `json:"venue"`
+	Location    string    `json:"location"`
 	Tags        []string  `json:"genres,omitempty"`
 	Cover       string    `json:"images,omitempty"`
 	Version     int32     `json:"version"`
@@ -59,21 +61,80 @@ func (m EventModel) Insert(event *Event) (*Event, error) {
 	return event, nil
 }
 
-func (m EventModel) GetAll(title string, tags []string, filters Filters) ([]*Event, Metadata, error) {
+func (m EventModel) GetAll(location, title, description string, tags []string, filters Filters) ([]*Event, Metadata, error) {
+	query := fmt.Sprintf(`
+		SELECT COUNT(*) OVER() 
+			id,created_at,start_time,end_time,title,description,venue,tags,cover,version
+		FROM 
+			events
+		WHERE 
+			(to_tsvector('simple',title) @@ plainto_tsquery('simple',$1) OR $1 = '')
+		AND
+			(to_tsvector('english',description) @@ plainto_tsquery('english',$2) OR $2 = '')
+		AND 
+			(tags @> $3 OR $3 = '{}')
+		ORDER BY 
+			%s %s,id ASC
+		LIMIT 
+			$4 
+		OFFSET 
+			$5
+	`, filters.sortColumn(), filters.sortDirection())
 
-	// query := fmt.Sprintf(`
-	// 	SELECT count(*) OVER(),id,created_at,start_time,end_time,title,description,venue,tags,cover,version
-	// 	FROM events
-	// 	WHERE (to_tsvector('simple',title) @@ plainto_tsquery('simple',$1) OR $1 = '')
-	// 	AND (genres @> $2 OR $2 = '{}')
-	// 	ORDER BY %s %s,id ASC
-	// 	LIMIT $3 OFFSET $4`, filters.sortColumn(), filters.sortDirection())
-	panic("implement me")
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
 
+	args := []interface{}{location, title, description, pq.Array(tags), filters.limit(), filters.offset()}
+	rows, err := m.DB.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, Metadata{}, err
+	}
+
+	var events []*Event
+
+	var totalRecords int
+
+	for rows.Next() {
+		var event Event
+
+		err := rows.Scan(&totalRecords, &event.ID, &event.StartTime, &event.EndTime,
+			&event.Title, &event.Description, &event.Venue, pq.Array(&event.Tags), &event.Cover, &event.Version)
+		if err != nil {
+			return nil, Metadata{}, err
+		}
+
+		events = append(events, &event)
+	}
+
+	metadata := calculateMetaData(totalRecords, filters.Page, filters.PageSize)
+
+	return events, metadata, nil
 }
 
 func (m EventModel) Get(id int64) (*Event, error) {
-	return nil, nil
+	var event Event
+
+	stmt := `
+		SELECT 
+			id,created_at,start_time,end_time,title,description,venue,tags,cover,version
+		FROM 
+			movies
+		WHERE 
+			id = $1
+		`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := m.DB.QueryRowContext(ctx, stmt, id).Scan(
+		&event.ID, &event.CreatedAt, &event.StartTime, &event.EndTime, &event.Title,
+		&event.Description, &event.Venue, &event.Cover, pq.Array(&event.Tags), &event.Version,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return &event, nil
 }
 
 func (m EventModel) Update(id int64, event *Event) (*Event, error) {
