@@ -43,12 +43,12 @@ type EventModel struct {
 
 func (m EventModel) Insert(event *Event) (*Event, error) {
 	query := `
-		INSERT INTO events(start_time,end_time,title,description,venue,tags,cover)
-		VALUES($1,$2,$3,$4,$5,$6,$7)
+		INSERT INTO events(start_time,end_time,title,description,venue,location,tags,cover)
+		VALUES($1,$2,$3,$4,$5,$6,$7,$8)
 		RETURNING id,created_at,version
 	`
 
-	args := []interface{}{event.StartTime, event.EndTime, event.Title, event.Description, event.Venue, pq.Array(event.Tags), event.Cover}
+	args := []interface{}{event.StartTime, event.EndTime, event.Title, event.Description, event.Venue, event.Location, pq.Array(event.Tags), event.Cover}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
@@ -64,7 +64,7 @@ func (m EventModel) Insert(event *Event) (*Event, error) {
 func (m EventModel) GetAll(location, title, description string, tags []string, filters Filters) ([]*Event, Metadata, error) {
 	query := fmt.Sprintf(`
 		SELECT COUNT(*) OVER() 
-			id,created_at,start_time,end_time,title,description,venue,tags,cover,version
+			id,created_at,start_time,end_time,title,description,venue,location,tags,cover,version
 		FROM 
 			events
 		WHERE 
@@ -73,18 +73,20 @@ func (m EventModel) GetAll(location, title, description string, tags []string, f
 			(to_tsvector('english',description) @@ plainto_tsquery('english',$2) OR $2 = '')
 		AND 
 			(tags @> $3 OR $3 = '{}')
+		AND 
+			location = $4
 		ORDER BY 
 			%s %s,id ASC
 		LIMIT 
-			$4 
-		OFFSET 
 			$5
+		OFFSET 
+			$6
 	`, filters.sortColumn(), filters.sortDirection())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	args := []interface{}{location, title, description, pq.Array(tags), filters.limit(), filters.offset()}
+	args := []interface{}{title, description, pq.Array(tags), location, filters.limit(), filters.offset()}
 	rows, err := m.DB.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, Metadata{}, err
@@ -98,7 +100,7 @@ func (m EventModel) GetAll(location, title, description string, tags []string, f
 		var event Event
 
 		err := rows.Scan(&totalRecords, &event.ID, &event.StartTime, &event.EndTime,
-			&event.Title, &event.Description, &event.Venue, pq.Array(&event.Tags), &event.Cover, &event.Version)
+			&event.Title, &event.Description, &event.Venue, &event.Location, pq.Array(&event.Tags), &event.Cover, &event.Version)
 		if err != nil {
 			return nil, Metadata{}, err
 		}
