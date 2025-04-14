@@ -1,25 +1,12 @@
-import { useState,useEffect } from 'react'
-import viteLogo from '/vite.svg'
+import { useState } from 'react'
 import { Header } from './components/Header'
+import { EventCard } from './components/EventCard'
 
 const Intro = () => {
   return (
     <div className="py-10 px-[60px]">
       <h1 className="text-3xl text-neutral-300 font-semibold">Discover Events</h1>
       <p className="text-white text-base py-[16px]">Explore popular events near you, browser by category, or check out some of the great community calendars</p>
-    </div>
-  )
-}
-
-const EventCard = ({title,cover,start_time,venue}) => {
-  return (
-    <div className="flex gap-3 py-2 items-center">
-      <img className="h-[84px] w-[85px] object-fill rounded-md" src={cover} /> 
-      <div>
-        <h3 className="font-semibold">{title}</h3>
-        <h5 className="text-sm text-neutral-500">{start_time}</h5>
-        <h5 className="text-sm text-neutral-500">{venue}</h5>
-      </div>
     </div>
   )
 }
@@ -84,7 +71,7 @@ const Discover = () => {
 
 
         <div>
-          <div className="text-xs px-3 py-2 bg-neutral-950 rounded-md">View All > </div>
+          <div className="text-xs px-3 py-2 bg-neutral-950 rounded-md">View All</div>
         </div>
     {/* <button className="bg-neutral-900 text-xs px-4 py-1.5 rounded-md hover:bg-neutral-450 hover:text-neutral-850">View All</button> */}
       </div>

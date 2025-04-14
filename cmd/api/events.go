@@ -17,6 +17,7 @@ func (app *application) createEventHandler(w http.ResponseWriter, r *http.Reques
 		Title       string    `json:"title"`
 		Description string    `json:"description"`
 		Venue       string    `json:"venue"`
+		Location    string    `json:"location"`
 		Tags        []string  `json:"tags"`
 		Cover       string    `json:"cover"`
 	}
@@ -33,6 +34,7 @@ func (app *application) createEventHandler(w http.ResponseWriter, r *http.Reques
 		Title:       input.Title,
 		Description: input.Description,
 		Venue:       input.Venue,
+		Location:    input.Location,
 		Tags:        input.Tags,
 		Cover:       input.Cover,
 	}

@@ -28,7 +28,6 @@ func ValidateEvent(v *validator.Validator, event *Event) {
 	v.Check(event.Title != "", "title", "title must be provided")
 	v.Check(len(event.Title) <= 500, "title", "title must not exceed 500 bytes")
 
-	// todo : check that the end time is not in the past, start time can be in the past
 	v.Check(event.EndTime.After(time.Now()), "start_time", "must not be in the past")
 	v.Check(event.StartTime.Before(event.EndTime), "start_time", "must be before end time")
 
