@@ -29,7 +29,7 @@ services:
 # database
   db:
     env_file: .env
-    image: "postgres"
+    image: "postgres:15"
     hostname: "db"
     ports:
       - "5432:5432"

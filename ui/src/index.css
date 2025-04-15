@@ -3,7 +3,7 @@
 @import "tailwindcss";
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Ubuntu Mono', sans-serif;
   box-sizing: border-box;
   height: 100%;
 }

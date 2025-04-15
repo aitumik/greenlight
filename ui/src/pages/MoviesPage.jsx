@@ -1,4 +1,4 @@
-export const MoviePage = () => {
+export const MoviesPage = () => {
   return (
     <div className="py-[24] px-[60px]">
       <h1 className="text-2xl">Movies</h1>
