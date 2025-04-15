@@ -1,3 +1,4 @@
+import { Layout } from '../components/Layout'
 import {Intro} from '../components/Intro'
 
 export const EventsPage = () => {
