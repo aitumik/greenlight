@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"greenlight/internal/data"
 	"greenlight/internal/validator"
-	"log"
 	"net/http"
 	"time"
 )
@@ -49,7 +48,6 @@ func (app *application) createEventHandler(w http.ResponseWriter, r *http.Reques
 
 	created, err := app.models.Events.Insert(event)
 	if err != nil {
-		log.Fatal(err)
 		app.serverErrorResponse(w, r, err)
 		return
 	}
@@ -81,7 +79,10 @@ func (app *application) showEventHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	app.writeJSON(w, http.StatusOK, envelope{"event": event}, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"event": event}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
 }
 
 func (app *application) listEventsHandler(w http.ResponseWriter, r *http.Request) {
@@ -125,4 +126,63 @@ func (app *application) listEventsHandler(w http.ResponseWriter, r *http.Request
 		app.serverErrorResponse(w, r, err)
 	}
 
+}
+
+func (app *application) updateEventHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := app.readIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+
+	event, err := app.models.Events.Get(id)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+
+	var input struct {
+		StartTime   time.Time `json:"start_time"`
+		EndTime     time.Time `json:"end_time"`
+		Title       string    `json:"title"`
+		Description string    `json:"description"`
+		Venue       string    `json:"venue"`
+		Location    string    `json:"location"`
+		Tags        []string  `json:"tags"`
+		Cover       string    `json:"cover"`
+	}
+
+	err = app.readJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	event.StartTime = input.StartTime
+	event.EndTime = input.EndTime
+	event.Title = input.Title
+	event.Description = input.Description
+	event.Venue = input.Venue
+	event.Location = input.Location
+	event.Tags = input.Tags
+	event.Cover = input.Cover
+
+	v := validator.New()
+	data.ValidateEvent(v, event)
+
+	if !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	// err = app.models.Events.Update(event)
+	// if err != nil {
+	// 	app.serverErrorResponse(w, r, err)
+	// 	return
+	// }
+
+	err = app.writeJSON(w, http.StatusOK, envelope{"event": event}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
 }
