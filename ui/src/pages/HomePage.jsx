@@ -41,6 +41,8 @@ const EventList = ({ events, onBuyTicket }) => {
 };
 
 const Discover = () => {
+  // todo : the first thing is fetch this from the backend or atleast match the state
+  // in the db
   const allEvents = [
     {
       title: "Health Sector AI Roundtable 4.0",
@@ -360,7 +362,7 @@ const ExploreLocalEvents = () => {
   );
 };
 
-export const ExplorePage = () => {
+export const HomePage = () => {
   return (
     <Layout>
       <div className="w-full min-h-screen" style={{ fontSize: "1.15rem" }}>

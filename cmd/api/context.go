@@ -2,8 +2,9 @@ package main
 
 import (
 	"context"
-	"greenlight/internal/data"
 	"net/http"
+
+	"greenlight/internal/data"
 )
 
 type contextKey string
